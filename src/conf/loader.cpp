@@ -80,7 +80,7 @@ optional<Config> load_configuration(const string &filepath) {
         static struct {
             boost::optional<bool> get_value(const string &s) const {
                 auto b_opt = to_bool(s);
-                return b_opt ? boost::make_optional<bool>(&b_opt.value()) : boost::none;
+                return b_opt ? boost::make_optional(b_opt.value()) : boost::none;
             }
         } bool_translator;
 
