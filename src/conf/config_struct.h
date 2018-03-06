@@ -24,15 +24,15 @@
 struct Config {
     std::string host = "0.0.0.0";
     unsigned short port = 5700;
-    bool use_http = true;
+    bool use_http = false;
     std::string ws_host = "0.0.0.0";
     unsigned short ws_port = 6700;
     bool use_ws = false;
     std::string ws_reverse_api_url = "";
     std::string ws_reverse_event_url = "";
     unsigned long ws_reverse_reconnect_interval = 3000;
-    bool ws_reverse_reconnect_on_code_1000 = false;
-    bool use_ws_reverse = false;
+    bool ws_reverse_reconnect_on_code_1000 = true;
+    bool use_ws_reverse = true;
     std::string post_url = "";
     std::string access_token = "";
     std::string secret = "";

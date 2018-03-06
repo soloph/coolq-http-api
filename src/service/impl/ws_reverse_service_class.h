@@ -17,6 +17,10 @@ public:
         event_.stop();
     }
 
+    bool heartbeat() const override {
+        return api_.heartbeat() && event_.heartbeat();
+    }
+
     bool initialized() const override {
         return api_.initialized() && event_.initialized();
     }
@@ -41,6 +45,7 @@ private:
 
         void start() override;
         void stop() override;
+        bool heartbeat() const override;
         bool good() const override;
 
     protected:
@@ -77,6 +82,20 @@ private:
         void set_reconnect_worker_running(const bool yes_or_no) {
             std::unique_lock<std::mutex> lock(reconnect_worker_running_mutex_);
             reconnect_worker_running_ = yes_or_no;
+        }
+
+        std::thread heartbeat_worker_thread_;
+        bool heartbeat_worker_running_ = false;
+        std::mutex heartbeat_worker_running_mutex_;
+
+        bool is_heartbeat_worker_running() {
+            std::unique_lock<std::mutex> lock(heartbeat_worker_running_mutex_);
+            return heartbeat_worker_running_;
+        }
+
+        void set_heartbeat_worker_running(const bool yes_or_no) {
+            std::unique_lock<std::mutex> lock(heartbeat_worker_running_mutex_);
+            heartbeat_worker_running_ = yes_or_no;
         }
     };
 

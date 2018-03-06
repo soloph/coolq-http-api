@@ -8,6 +8,7 @@ class WsService final : public ServiceBase, public IPushable {
 public:
     void start() override;
     void stop() override;
+    bool heartbeat() const override;
     bool good() const override;
 
     void push_event(const json &payload) const override;

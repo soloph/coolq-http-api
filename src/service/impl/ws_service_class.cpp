@@ -68,6 +68,10 @@ void WsService::stop() {
     finalize();
 }
 
+bool WsService::heartbeat() const {
+    return ServiceBase::heartbeat();
+}
+
 bool WsService::good() const {
     if (config.use_ws) {
         return initialized_ && started_;

@@ -12,6 +12,7 @@ public:
     virtual bool initialized() const { return initialized_; }
     virtual bool started() const { return started_; }
     virtual bool good() const { return true; }
+    virtual bool heartbeat() const { return true; }
 
 protected:
     bool initialized_ = false;

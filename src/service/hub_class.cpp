@@ -30,7 +30,7 @@ void ServiceHub::start() {
         service->start();
     }
 
-    Log::d(TAG, u8"ÒÑ¿ªÆô API ·þÎñ");
+    Log::d(TAG, u8"ï¿½Ñ¿ï¿½ï¿½ï¿½ API ï¿½ï¿½ï¿½ï¿½");
 }
 
 void ServiceHub::stop() {
@@ -39,7 +39,14 @@ void ServiceHub::stop() {
     }
     services_.clear();
 
-    Log::d(TAG, u8"ÒÑ¹Ø±Õ API ·þÎñ");
+    Log::d(TAG, u8"ï¿½Ñ¹Ø±ï¿½ API ï¿½ï¿½ï¿½ï¿½");
+}
+
+bool ServiceHub::heartbeat() const {
+    for (auto &entry : services_) {
+        entry.second->heartbeat();
+    }
+    return true;
 }
 
 bool ServiceHub::good() const {

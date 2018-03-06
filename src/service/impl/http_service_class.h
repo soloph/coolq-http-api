@@ -8,6 +8,7 @@ public:
     void start() override;
     void stop() override;
     bool good() const override;
+    bool heartbeat() const override;
 
 protected:
     void init() override;

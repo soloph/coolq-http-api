@@ -178,6 +178,10 @@ void HttpService::stop() {
     finalize();
 }
 
+bool HttpService::heartbeat() const {
+    return ServiceBase::heartbeat();
+}
+
 bool HttpService::good() const {
     if (config.use_http) {
         return initialized_ && started_;

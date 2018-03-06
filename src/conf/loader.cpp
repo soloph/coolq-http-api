@@ -50,7 +50,7 @@ optional<Config> load_configuration(const string &filepath) {
             file << "[general]" << endl
                     << "host=0.0.0.0" << endl
                     << "port=5700" << endl
-                    << "use_http=yes" << endl
+                    << "use_http=no" << endl
                     << "ws_host=0.0.0.0" << endl
                     << "ws_port=6700" << endl
                     << "use_ws=no" << endl
@@ -80,7 +80,7 @@ optional<Config> load_configuration(const string &filepath) {
         static struct {
             boost::optional<bool> get_value(const string &s) const {
                 auto b_opt = to_bool(s);
-                return b_opt ? boost::make_optional<bool>(b_opt.value()) : boost::none;
+                return b_opt ? boost::make_optional<bool>(&b_opt.value()) : boost::none;
             }
         } bool_translator;
 

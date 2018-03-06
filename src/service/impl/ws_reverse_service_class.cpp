@@ -71,7 +71,7 @@ void WsReverseService::SubServiceBase::start() {
                         should_reconnect_ = false;
                     });
                     if (should_reconn) {
-                        Log::d(TAG, u8"反向 WebSocket（" + name() + u8"）客户端连接失败或异常断开，将在 "
+                        Log::w(TAG, u8"反向 WebSocket（" + name() + u8"）客户端连接失败或异常断开，将在 "
                                + to_string(config.ws_reverse_reconnect_interval) + u8" 毫秒后尝试重连");
                         Sleep(config.ws_reverse_reconnect_interval);
                         stop();
@@ -87,6 +87,23 @@ void WsReverseService::SubServiceBase::start() {
             } catch (...) {}
         });
 
+        heartbeat_worker_thread_ = thread([&]() {
+            try {
+                set_heartbeat_worker_running(true);
+                while (is_heartbeat_worker_running()) {
+                    heartbeat();
+                    Log::d(TAG, u8"反向 WebSocket（" + name() + u8"）客户端发送 heartbeat 成功");
+                    if (is_heartbeat_worker_running()) {
+                        Sleep(30000); // wait 30000 ms for the next check
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            catch (...) {}
+        });
+
         if (client_is_wss_.has_value()) {
             // client successfully initialized
             thread_ = thread([&]() {
@@ -97,8 +114,9 @@ void WsReverseService::SubServiceBase::start() {
                     } else {
                         client_.wss->start();
                     }
-                } catch (...) {}
-                started_ = false;
+                } catch (...) {
+                    started_ = false;
+                }
             });
             Log::d(TAG, u8"开启 WebSocket 反向客户端（" + name() + u8"）成功，开始连接 " + url());
         }
@@ -106,9 +124,13 @@ void WsReverseService::SubServiceBase::start() {
 }
 
 void WsReverseService::SubServiceBase::stop() {
-    set_reconnect_worker_running(false); // this will notify the reconnect worker to stop
+    // this will notify the reconnect worker to stop
+    set_reconnect_worker_running(false);
+    set_heartbeat_worker_running(false);
+
     // detach but not join, because we want the thread continue to run until its next check
     reconnect_worker_thread_.detach();
+    heartbeat_worker_thread_.detach();
 
     if (started_) {
         if (client_is_wss_.value() == false) {
@@ -123,6 +145,29 @@ void WsReverseService::SubServiceBase::stop() {
     }
 
     finalize();
+}
+
+bool WsReverseService::SubServiceBase::heartbeat() const {
+    if (started_) {
+        try {
+            if (client_is_wss_.value() == false) {
+                const auto send_stream = make_shared<WsClient::SendStream>();
+                *send_stream << "_hb";
+                unique_lock<mutex> lock(client_.ws->connection_mutex);
+                client_.ws->connection->send(send_stream);
+                lock.unlock();
+            }
+            else {
+                const auto send_stream = make_shared<WssClient::SendStream>();
+                *send_stream << "_hb";
+                unique_lock<mutex> lock(client_.wss->connection_mutex);
+                client_.wss->connection->send(send_stream);
+                lock.unlock();
+            }
+        }
+        catch (...) {}
+    }
+    return true;
 }
 
 bool WsReverseService::SubServiceBase::good() const {
