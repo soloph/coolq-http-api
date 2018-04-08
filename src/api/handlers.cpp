@@ -286,10 +286,13 @@ HANDLER(set_group_add_request) {
 HANDLER(get_login_info) {
     auto id = sdk->get_login_qq();
     auto nickname = sdk->get_login_nick();
+    auto bytes = sdk->get_stranger_info_raw(10000, true);
+    auto online = bytes.size() >= Stranger::MIN_SIZE;
     result.retcode = nickname.empty() ? RetCodes::INVALID_DATA : RetCodes::OK;
     result.data = {
         {"user_id", id},
-        {"nickname", nickname}
+        {"nickname", nickname},
+        {"online", online}
     };
 }
 
@@ -491,6 +494,12 @@ HANDLER(clean_data_dir) {
 
 HANDLER(clean_data_dir_async) {
     handle_async(__clean_data_dir, params, result);
+}
+
+HANDLER(send_config) {
+    auto config = params.get("config");
+    result.retcode = RetCodes::OK;
+    result.data = { { } };
 }
 
 #pragma endregion

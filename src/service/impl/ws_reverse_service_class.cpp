@@ -79,7 +79,7 @@ void WsReverseService::SubServiceBase::start() {
                     }
 
                     if (is_reconnect_worker_running()) {
-                        Sleep(500); // wait 500 ms for the next check
+                        Sleep(3000); // wait 3000 ms for the next check
                     } else {
                         break;
                     }
@@ -126,11 +126,13 @@ void WsReverseService::SubServiceBase::start() {
 void WsReverseService::SubServiceBase::stop() {
     // this will notify the reconnect worker to stop
     set_reconnect_worker_running(false);
-    set_heartbeat_worker_running(false);
-
     // detach but not join, because we want the thread continue to run until its next check
     reconnect_worker_thread_.detach();
-    heartbeat_worker_thread_.detach();
+
+    set_heartbeat_worker_running(false);
+    if (heartbeat_worker_thread_.joinable()) {
+        heartbeat_worker_thread_.join();
+    }
 
     if (started_) {
         if (client_is_wss_.value() == false) {
